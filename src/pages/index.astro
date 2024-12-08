@@ -1,34 +1,22 @@
 ---
-import PlusIcon from '../components/Icons/PlusIcon.astro';
+import InputTask from '../components/InputTask.astro';
+import ButtonPlusTask from '../components/ButtonPlusTask.astro';
+import SectionTask from '../components/SectionTask.astro';
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout>
-	<div class="section">
-		<div class="min-h-screen bg-gray-100 flex items-center justify-center">
-			<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-				<h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Mis Tareas</h1>
-				<div class="flex mb-4">
-					<input id="task" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 flex-grow mr-2" placeholder="Añadir nueva tarea..." type="text" value="">
-					<button id="button-plus" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-[#18181A] hover:bg-[#18181A] h-10 px-4 py-2">
-						<PlusIcon />
-					</button>
-				</div>
-
-				<ul class="space-y-2">
-					
-				</ul>
-			</div>
-		</div>
-	</div>
-	
+	<SectionTask>
+		<InputTask />
+		<ButtonPlusTask />
+	</SectionTask>
 </Layout>
 
 <script>
-	const inputTask = document.querySelector('#task');
-	const buttonPlus = document.querySelector('#button-plus'); 
+	const inputTask = document.querySelector('#task') as HTMLInputElement | null;
+	const buttonPlus = document.querySelector('#button-plus') as HTMLElement | null;
 
-	if (buttonPlus) {
+	if (buttonPlus && inputTask) {
 		buttonPlus.addEventListener('click', () => {
 			if (inputTask.value === '') {
 				alert('Por favor, añada una tarea');
@@ -36,31 +24,49 @@ import Layout from '../layouts/Layout.astro';
 			}
 
 			const li = document.createElement('li');
-
 			li.innerHTML = `
 				<div class="flex items-center justify-between bg-gray-50 p-3 rounded">
 					<div class="flex items-center">
-						<button type="button" role="checkbox" aria-checked="false" data-state="unchecked" value="on" class="peer h-4 w-4 shrink-0 rounded-sm border border-[#18181A] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground mr-2"></button>
-						<span class="text-gray-700">${inputTask.value}</span>
+						<input type="checkbox" class="task-checkbox peer h-4 w-4 shrink-0 rounded-sm border border-[#18181A] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mr-2" />
+						<span class="task-text text-gray-700">${inputTask.value}</span>
 					</div>
-					<button id="button-delete-task" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
+					<button class="button-delete-task inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3">
 						Eliminar
 					</button>
 				</div>
 			`;
 
-			document.querySelector('ul').appendChild(li);
-			inputTask.value = '';
-		});
-	}
+			const ul = document.querySelector('ul');
+			if (ul) {
+				ul.appendChild(li);
 
-	const buttonDeleteTask = document.querySelector('#button-delete-task');
-	
-	if (buttonDeleteTask) {
-		buttonDeleteTask.addEventListener('click', () => {
-			const li = buttonDeleteTask.parentElement;
-			li.remove();
-		});
-	}
+				inputTask.value = '';
 
+				const taskCheckbox = li.querySelector('.task-checkbox') as HTMLInputElement | null;
+				const taskText = li.querySelector('.task-text') as HTMLElement | null;
+
+				if (taskCheckbox && taskText) {
+					taskCheckbox.addEventListener('change', () => {
+						if (taskCheckbox.checked) {
+							taskCheckbox.classList.add('bg-[#18181A]');
+							taskText.classList.add('line-through', 'text-gray-400');
+						} else {
+							taskText.classList.remove('line-through', 'text-gray-400');
+						}
+					});
+				}
+
+				const buttonDeleteTask = li.querySelector('.button-delete-task') as HTMLElement | null;
+				if (buttonDeleteTask) {
+					buttonDeleteTask.addEventListener('click', () => {
+						li.remove();
+					});
+				}
+			} else {
+				console.error('No se encontró el elemento <ul>');
+			}
+		});
+	} else {
+		console.error('No se encontró el botón Plus o el campo InputTask');
+	}
 </script>
